@@ -1,10 +1,13 @@
+# Auto Almost Everything
+# Youtube Channel https://www.youtube.com/channel/UC4cNnZIrjAC8Q4mcnhKqPEQ
+# Please read README.md carefully before use
+
 # Solve captcha by using https://2captcha.com?from=11528745.
 
-import requests
-import time
+import requests, time
 
 
-class Captcha:
+class AC_2Captcha:
     def __init__(self, APIKey):
         self.APIKey = APIKey
 

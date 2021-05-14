@@ -1,8 +1,6 @@
-# FaucetCrypto
+# FaucetCrypto Auto Claim Reward & Do Tasks
 
 ### [English - Tiếng Việt bên dưới]
-
-##### FaucetCrypto automatically claim reward & do tasks
 
 ###### Functions:
 
@@ -22,26 +20,20 @@
 
 ###### Tutorial:
 
-[17/04/2021]
+v1.0 [View on Youtube](https://www.youtube.com/watch?v=0B6Jy9-OZ2M)
 
 - Claim Faucet.
 - Do Ptc Ads.
 - ~~Do Offerwalls _ Asia Mag~~.
 
-[![SC2 Video](http://i3.ytimg.com/vi/0B6Jy9-OZ2M/maxresdefault.jpg)](https://www.youtube.com/watch?v=0B6Jy9-OZ2M)
-
-[19/04/2021]
+v1.1 [View on Youtube](https://www.youtube.com/watch?v=L7G-1abgmwA)
 
 - Do ShortLink.
 
-[![SC2 Video](http://i3.ytimg.com/vi/L7G-1abgmwA/maxresdefault.jpg)](https://www.youtube.com/watch?v=L7G-1abgmwA)
-
-[05/05/2021]
+v1.2 [View on Youtube](https://www.youtube.com/watch?v=-WruUpRYzEw)
 
 - Claim Challenges.
 - Automatically solve captcha by using 2Captcha.
-
-[![SC2 Video](http://i3.ytimg.com/vi/-WruUpRYzEw/maxresdefault.jpg)](https://www.youtube.com/watch?v=-WruUpRYzEw)
 
 ###### Please do step by step to use:
 
@@ -83,26 +75,20 @@
 
 ###### Hướng dẫn:
 
-[17/04/2021]
+v1.0 [Xem trên Youtube](https://www.youtube.com/watch?v=uUgZGGnTmDk)
 
 - Nhận thưởng từ vòi.
 - Làm nhiệm vụ Ptc Ads.
 - ~~Làm nhiệm vụ Offerwalls _ Asia Mag~~.
 
-[![SC2 Video](http://i3.ytimg.com/vi/0B6Jy9-OZ2M/maxresdefault.jpg)](https://www.youtube.com/watch?v=0B6Jy9-OZ2M)
-
-[19/04/2021]
+v1.1 [Xem trên Youtube](https://www.youtube.com/watch?v=L7G-1abgmwA)
 
 - Làm nhiệm vụ Shortlink.
 
-[![SC2 Video](http://i3.ytimg.com/vi/L7G-1abgmwA/maxresdefault.jpg)](https://www.youtube.com/watch?v=L7G-1abgmwA)
-
-[05/05/2021]
+v1.2 [Xem trên Youtube](https://www.youtube.com/watch?v=-WruUpRYzEw)
 
 - Nhận thưởng thử thách.
 - Tự động giải captcha bằng 2Captcha.
-
-[![SC2 Video](http://i3.ytimg.com/vi/-WruUpRYzEw/maxresdefault.jpg)](https://www.youtube.com/watch?v=-WruUpRYzEw)
 
 ###### Vui lòng thực hiện theo các bước sau:
 
@@ -124,10 +110,7 @@
 
 # Auto Almost Everything
 
-Email: autoalmosteverything.2021@gmail.com
-
-Youtube: https://www.youtube.com/channel/UC4cNnZIrjAC8Q4mcnhKqPEQ
-
-Github: https://github.com/autoalmosteverything?tab=repositories
-
-Facebook: https://www.facebook.com/autoalmosteverything
+- Email: autoalmosteverything.2021@gmail.com
+- Youtube: https://www.youtube.com/channel/UC4cNnZIrjAC8Q4mcnhKqPEQ
+- Github: https://github.com/autoalmosteverything?tab=repositories
+- Facebook: https://www.facebook.com/autoalmosteverything

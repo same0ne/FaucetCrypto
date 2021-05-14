@@ -1,18 +1,16 @@
 # Auto Almost Everything
 # Youtube Channel https://www.youtube.com/channel/UC4cNnZIrjAC8Q4mcnhKqPEQ
-# Facebook Community https://www.facebook.com/autoalmosteverything
-# Github Source Code https://github.com/autoalmosteverything?tab=repositories
 # Please read README.md carefully before use
 
-import threading
-import time
-import winsound
+import threading, requests, time
 import urllib.parse as urlparse
-from captcha import Captcha
-import requests  # python -m pip install requests
-from selenium import webdriver  # python -m pip install selenium
+from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from win10toast import ToastNotifier  # python -m pip install win10toast
+from Modules import update, notification, captcha
+
+app = 'FaucetCrypto'
+app_path = 'https://faucetcrypto.com'
+app_domain = 'faucetcrypto.com'
 
 # Browser config
 chromedriver_path = '.\\chromedriver.exe'  # <-- Change to your Chrome WebDriver path, replace "\" with "\\".
@@ -23,6 +21,7 @@ opts.add_experimental_option('useAutomationExtension', False)
 # opts.headless = True  # <-- Comment this line if you want to show browser.
 # opts.add_argument('--proxy-server=%s' % 'YourProxy')  # <-- Remove comment this line then replace 'YourProxy' by proxy string, such as 18.222.190.66:81.
 
+# Account config
 faucetcrypto_cookies = [
     {
         # Replace by your remember cookie name -->
@@ -36,26 +35,18 @@ faucetcrypto_cookies = [
     },
 ]
 
+# Anti captcha config
 autoCaptcha = False  # <-- Change to True if you want to use 2captcha to solve the captcha.
 if autoCaptcha:
     # Replace by your 2Captcha API Key -->
-    hc = Captcha('Your2CaptchaAPIKey')
+    hc = captcha.AC_2Captcha('Your2CaptchaAPIKey')
     # <-- Replace by your 2Captcha API Key
 
 sync = True
 
 
-# Notification
-def Notification(app, content):
-    try:
-        toast = ToastNotifier()
-        toast.show_toast(app, content, duration=6)
-    except:
-        pass
-
-
-# Remove elements
-def RemoveElements(browser):
+# Remove fixed elements
+def RemoveFixedElements(browser):
     try:
         browser.find_element_by_xpath("//button[contains(text(), 'Skip')]").click()
         time.sleep(1)
@@ -75,8 +66,8 @@ def RemoveElements(browser):
 
 # Claim Challenges
 def ClaimChallenges(faucetcrypto_cookies):
-    app = 'Claim Challenges'
-    path = 'https://faucetcrypto.com'
+    func = 'Claim Challenges'
+    func_path = '/challenge/list'
 
     while True:
         global sync
@@ -85,12 +76,12 @@ def ClaimChallenges(faucetcrypto_cookies):
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
             browser.set_page_load_timeout(60)
             try:
-                browser.get(path)
+                browser.get(app_path)
                 for cookie in faucetcrypto_cookies:
                     browser.add_cookie(cookie)
-                browser.get(path + '/challenge/list')
+                browser.get(app_path + func_path)
                 time.sleep(1)
-                RemoveElements(browser)
+                RemoveFixedElements(browser)
                 buttons = browser.find_elements_by_xpath("//button[contains(text(), 'Claim Challenge')]")
                 claimed = 0
                 if len(buttons) > 0:
@@ -103,13 +94,13 @@ def ClaimChallenges(faucetcrypto_cookies):
                             except:
                                 pass
                 if claimed:
-                    Notification(app, 'Claimed %d challenges!' % claimed)
+                    notification.notify(app, 'Claimed %d challenges!' % claimed)
                 else:
-                    Notification(app, 'No challenge to claim!')
+                    notification.notify(app, 'No challenge to claim!')
                 time.sleep(1)
             except Exception as ex:
-                print('%s has exception:\n%s!' % (app, ex))
-                Notification(app, '%s has exception:\n%s!' % (app, ex))
+                print('%s has exception:\n%s!' % (app + ' ' + func, ex))
+                notification.notify(app, '%s has exception:\n%s!' % (func, ex))
             finally:
                 browser.quit()
             sync = True
@@ -120,9 +111,8 @@ def ClaimChallenges(faucetcrypto_cookies):
 
 # Claim Faucet
 def ClaimFaucet(faucetcrypto_cookies):
-    # App config
-    app = 'Claim Faucet'
-    path = 'https://faucetcrypto.com'
+    func = 'Claim Faucet'
+    func_path = '/task/faucet-claim'
 
     while True:
         global sync
@@ -131,24 +121,24 @@ def ClaimFaucet(faucetcrypto_cookies):
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
             browser.set_page_load_timeout(60)
             try:
-                browser.get(path)
+                browser.get(app_path)
                 for cookie in faucetcrypto_cookies:
                     browser.add_cookie(cookie)
-                browser.get(path + '/task/faucet-claim')
+                browser.get(app_path + func_path)
                 time.sleep(1)
-                RemoveElements(browser)
+                RemoveFixedElements(browser)
                 if 'Ready To Claim!' in browser.page_source:
                     time_start = time.time()
                     while True:
                         if 'Ready To Claim!' not in browser.page_source:
-                            Notification(app, 'Claimed faucet!')
+                            notification.notify(app, 'Claimed faucet!')
                             break
                         elif 'You have failed to complete the captcha many times' in browser.page_source:
-                            Notification(app, 'Failed to complete the captcha many times!')
+                            notification.notify(app, 'Failed to complete the captcha many times!')
                             break
                         elif 'Please click on the similar buttons in the following order' in browser.page_source:
-                            winsound.Beep(999, 500)
-                            Notification(app, 'Please solve captcha!')
+                            notification.sound()
+                            notification.notify(app, 'Please solve captcha!')
                             time.sleep(60)
                             if 'Get Reward' in browser.page_source:
                                 break
@@ -182,8 +172,8 @@ def ClaimFaucet(faucetcrypto_cookies):
                                 res = requests.post(link, cookies=cookies, headers=headers, data=data, timeout=30)
                                 browser.execute_script('window.location.href = arguments[0];', res.url)
                             else:
-                                winsound.Beep(999, 500)
-                                Notification(app, 'Please solve captcha!')
+                                notification.sound()
+                                notification.notify(app, 'Please solve captcha!')
                                 time.sleep(60)
                                 if 'Get Reward' in browser.page_source:
                                     break
@@ -199,14 +189,14 @@ def ClaimFaucet(faucetcrypto_cookies):
                                     except:
                                         pass
                         if time.time() - time_start > 360:
-                            Notification(app, 'Timeout.')
+                            notification.notify(app, 'Timeout.')
                             break
                     time.sleep(1)
                 else:
-                    Notification(app, 'Not ready to claim!')
+                    notification.notify(app, 'Not ready to claim!')
             except Exception as ex:
-                print('%s has exception:\n%s!' % (app, ex))
-                Notification(app, '%s has exception:\n%s!' % (app, ex))
+                print('%s has exception:\n%s!' % (app + ' ' + func, ex))
+                notification.notify(app, '%s has exception:\n%s!' % (func, ex))
             finally:
                 browser.quit()
             sync = True
@@ -217,10 +207,8 @@ def ClaimFaucet(faucetcrypto_cookies):
 
 # Do Ptc Ads
 def DoPtcAds(faucetcrypto_cookies):
-    # App config
-    app = 'Do Ptc Ads'
-    path = 'https://faucetcrypto.com'
-    domain = "faucetcrypto.com"
+    func = 'Do Ptc Ads'
+    func_path = '/ptc/list'
 
     while True:
         global sync
@@ -230,12 +218,12 @@ def DoPtcAds(faucetcrypto_cookies):
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
             browser.set_page_load_timeout(60)
             try:
-                browser.get(path)
+                browser.get(app_path)
                 for cookie in faucetcrypto_cookies:
                     browser.add_cookie(cookie)
-                browser.get(path + '/ptc/list')
+                browser.get(app_path + func_path)
                 time.sleep(1)
-                RemoveElements(browser)
+                RemoveFixedElements(browser)
                 havePtcAds = True
                 try:
                     browser.find_element_by_xpath(
@@ -244,7 +232,7 @@ def DoPtcAds(faucetcrypto_cookies):
                 except:
                     havePtcAds = False
                     delay_time = 3600
-                    Notification(app, 'No Ptc Ads to click!')
+                    notification.notify(app, 'No Ptc Ads to click!')
                 if havePtcAds:
                     time_start = time.time()
                     while True:
@@ -253,7 +241,7 @@ def DoPtcAds(faucetcrypto_cookies):
                                 target_tag = None
                                 for handle in browser.window_handles:
                                     browser.switch_to.window(handle)
-                                    if domain not in browser.current_url:
+                                    if app_domain not in browser.current_url:
                                         browser.close()
                                     else:
                                         target_tag = handle
@@ -264,11 +252,11 @@ def DoPtcAds(faucetcrypto_cookies):
                             pass
                         if 'You have failed to complete the captcha many times' in browser.page_source:
                             delay_time = 1500
-                            Notification(app, 'Failed to complete the captcha many times!')
+                            notification.notify(app, 'Failed to complete the captcha many times!')
                             break
                         elif 'Please click on the similar buttons in the following order' in browser.page_source:
-                            winsound.Beep(999, 500)
-                            Notification(app, 'Please solve captcha!')
+                            notification.sound()
+                            notification.notify(app, 'Please solve captcha!')
                             time.sleep(60)
                             if 'Get Reward' in browser.page_source:
                                 break
@@ -301,8 +289,8 @@ def DoPtcAds(faucetcrypto_cookies):
                                 res = requests.post(link, cookies=cookies, headers=headers, data=data, timeout=30)
                                 browser.execute_script('window.location.href = arguments[0];', res.url)
                             else:
-                                winsound.Beep(999, 500)
-                                Notification(app, 'Please solve captcha!')
+                                notification.sound()
+                                notification.notify(app, 'Please solve captcha!')
                                 time.sleep(60)
                                 if 'Get Reward' in browser.page_source:
                                     break
@@ -320,17 +308,17 @@ def DoPtcAds(faucetcrypto_cookies):
                         elif 'Continue' in browser.page_source:
                             try:
                                 browser.find_element_by_xpath("//a[contains(text(), 'Continue')]").click()
-                                Notification(app, 'Completed task!')
+                                notification.notify(app, 'Completed task!')
                                 break
                             except:
                                 pass
                         if time.time() - time_start > 360:
-                            Notification(app, 'Timeout.')
+                            notification.notify(app, 'Timeout.')
                             break
                         time.sleep(1)
             except Exception as ex:
-                print('%s has exception:\n%s!' % (app, ex))
-                Notification(app, '%s has exception:\n%s!' % (app, ex))
+                print('%s has exception:\n%s!' % (app + ' ' + func, ex))
+                notification.notify(app, '%s has exception:\n%s!' % (func, ex))
             finally:
                 browser.quit()
             sync = True
@@ -341,11 +329,9 @@ def DoPtcAds(faucetcrypto_cookies):
 
 # Do Short link
 def DoShortlink(faucetcrypto_cookies):
-    # App config
-    app = 'Do Shortlink'
-    path = 'https://faucetcrypto.com'
-    domain = 'faucetcrypto.com'
-    domain1 = '/faucetcrypto.com/claim/step/'
+    func = 'Do Shortlink'
+    func_path = '/shortlink/list'
+    func_domain = 'faucetcrypto.com/claim/step/'
 
     while True:
         global sync
@@ -355,12 +341,12 @@ def DoShortlink(faucetcrypto_cookies):
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
             browser.set_page_load_timeout(60)
             try:
-                browser.get(path)
+                browser.get(app_path)
                 for cookie in faucetcrypto_cookies:
                     browser.add_cookie(cookie)
-                browser.get(path + '/shortlink/list')
+                browser.get(app_path + func_path)
                 time.sleep(1)
-                RemoveElements(browser)
+                RemoveFixedElements(browser)
                 haveShortlink = True
                 while True:
                     try:
@@ -369,11 +355,11 @@ def DoShortlink(faucetcrypto_cookies):
                             target_tag = None
                             for handle in browser.window_handles:
                                 browser.switch_to.window(handle)
-                                if domain not in browser.current_url:
+                                if app_domain not in browser.current_url:
                                     if windows_count > 1:
                                         browser.close()
                                     else:
-                                        browser.get(path + '/shortlink/list')
+                                        browser.get(app_path + func_path)
                                         target_tag = handle
                                 else:
                                     target_tag = handle
@@ -388,12 +374,12 @@ def DoShortlink(faucetcrypto_cookies):
                         else:
                             haveShortlink = False
                             delay_time = 3600
-                            Notification(app, 'No Shortlink to click!')
+                            notification.notify(app, 'No Shortlink to click!')
                         time.sleep(1)
                     except:
                         haveShortlink = False
                         delay_time = 3600
-                        Notification(app, 'No Shortlink to click!')
+                        notification.notify(app, 'No Shortlink to click!')
                     finally:
                         break
                 if haveShortlink:
@@ -406,8 +392,8 @@ def DoShortlink(faucetcrypto_cookies):
                                 target_tag = None
                                 for handle in browser.window_handles:
                                     browser.switch_to.window(handle)
-                                    if (domain not in browser.current_url and not is_shortlink_page) or (
-                                            domain1 not in browser.current_url and is_shortlink_page):
+                                    if (app_domain not in browser.current_url and not is_shortlink_page) or (
+                                            func_domain not in browser.current_url and is_shortlink_page):
                                         browser.close()
                                     else:
                                         target_tag = handle
@@ -418,11 +404,11 @@ def DoShortlink(faucetcrypto_cookies):
                             pass
                         if 'You have failed to complete the captcha many times' in browser.page_source:
                             delay_time = 1500
-                            Notification(app, 'Failed to complete the captcha many times!')
+                            notification.notify(app, 'Failed to complete the captcha many times!')
                             break
                         elif 'Please click on the similar buttons in the following order' in browser.page_source:
-                            winsound.Beep(999, 500)
-                            Notification(app, 'Please solve captcha!')
+                            notification.sound()
+                            notification.notify(app, 'Please solve captcha!')
                             time.sleep(60)
                             if 'Get Reward' in browser.page_source:
                                 break
@@ -456,8 +442,8 @@ def DoShortlink(faucetcrypto_cookies):
                                 browser.execute_script('window.location.href = arguments[0];',
                                                        res.headers['X-Inertia-Location'])
                             else:
-                                winsound.Beep(999, 500)
-                                Notification(app, 'Please solve captcha!')
+                                notification.sound()
+                                notification.notify(app, 'Please solve captcha!')
                                 time.sleep(60)
                                 if 'Get Reward' in browser.page_source:
                                     break
@@ -484,17 +470,17 @@ def DoShortlink(faucetcrypto_cookies):
                                 browser.find_element_by_xpath("//button[contains(text(), 'Continue')]").click()
                                 step_count += 1
                                 if step_count == 3:
-                                    Notification(app, 'Complete Shortlink task!')
+                                    notification.notify(app, 'Complete Shortlink task!')
                                     break
                             except:
                                 pass
                         if time.time() - time_start > 360:
-                            Notification(app, 'Timeout.')
+                            notification.notify(app, 'Timeout.')
                             break
                         time.sleep(1)
             except Exception as ex:
-                print('%s has exception:\n%s!' % (app, ex))
-                Notification(app, '%s has exception:\n%s!' % (app, ex))
+                print('%s has exception:\n%s!' % (app + ' ' + func, ex))
+                notification.notify(app, '%s has exception:\n%s!' % (func, ex))
             finally:
                 browser.quit()
             sync = True
@@ -505,10 +491,11 @@ def DoShortlink(faucetcrypto_cookies):
 
 # Do Offerwalls
 def DoOfferwalls_AsiaMag(faucetcrypto_cookies):
-    # App config
-    app = 'Do Offerwalls - Asia Mag'
-    path = 'http://asia-mag.com'
-    domain = 'asia-mag.com'
+    func = 'Do Offerwalls - Asia Mag'
+    func_path = 'http://asia-mag.com'
+    func_domain = 'asia-mag.com'
+
+    # Account config
     # Replace by your ASIA Mag visit code -->
     asiamag_visit_code = 'YourVisitCode'
     # <-- Replace by your ASIA Mag visit code
@@ -521,7 +508,7 @@ def DoOfferwalls_AsiaMag(faucetcrypto_cookies):
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
             browser.set_page_load_timeout(60)
             try:
-                browser.get(path)
+                browser.get(func_path)
                 time.sleep(1)
                 # Step 0
                 browser.find_element_by_xpath("//input[@name='Sid']").send_keys(asiamag_visit_code)
@@ -535,7 +522,7 @@ def DoOfferwalls_AsiaMag(faucetcrypto_cookies):
                             target_tag = None
                             for handle in browser.window_handles:
                                 browser.switch_to.window(handle)
-                                if domain not in browser.current_url:
+                                if func_domain not in browser.current_url:
                                     browser.close()
                                 else:
                                     target_tag = handle
@@ -557,10 +544,10 @@ def DoOfferwalls_AsiaMag(faucetcrypto_cookies):
                         pass
                     if 'This IP/User reached daily maximum sessions !' in browser.page_source:
                         delay_time = 43200
-                        Notification(app, 'IP/Use reached daily maximum sessions.')
+                        notification.notify(app, 'IP/Use reached daily maximum sessions.')
                         break
                     elif 'Thanks for your participation !</h1>' in browser.page_source:
-                        Notification(app, "Completed offer!")
+                        notification.notify(app, "Completed offer!")
                         break
                     elif 'to continue...</h5>' in browser.page_source:
                         try:
@@ -600,16 +587,16 @@ def DoOfferwalls_AsiaMag(faucetcrypto_cookies):
                         except:
                             pass
                     elif '/4 : Complete captcha on bottom page !</h5>' in browser.page_source:
-                        winsound.Beep(999, 500)
-                        Notification(app, 'Please solve captcha!')
+                        notification.sound()
+                        notification.notify(app, 'Please solve captcha!')
                         time.sleep(90)
                         break
                     if time.time() - time_start > 360:
                         break
                     time.sleep(1)
             except Exception as ex:
-                print('%s has exception:\n%s!' % (app, ex))
-                Notification(app, '%s has exception:\n%s!' % (app, ex))
+                print('%s has exception:\n%s!' % (app + ' ' + func, ex))
+                notification.notify(app, '%s has exception:\n%s!' % (func, ex))
             finally:
                 browser.quit()
             sync = True
@@ -618,19 +605,20 @@ def DoOfferwalls_AsiaMag(faucetcrypto_cookies):
             time.sleep(1)
 
 
-try:
-    threads = []
-    threads.append(threading.Thread(target=ClaimChallenges, args=(faucetcrypto_cookies,)))
-    threads.append(threading.Thread(target=ClaimFaucet, args=(faucetcrypto_cookies,)))
-    threads.append(threading.Thread(target=DoPtcAds, args=(faucetcrypto_cookies,)))
-    threads.append(threading.Thread(target=DoShortlink, args=(faucetcrypto_cookies,)))
-    # threads.append(threading.Thread(target=DoOfferwalls_AsiaMag, args=()))
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
-except Exception as ex:
-    print('Threading has exception:\n%s!' % ex)
-
-# Please Like Facebook, Subscribe to Youtube channel, Give stars to Git repositories to support us!
-# Contact me: autoalmosteverything.2021@gmail.com
+if update.check():
+    notification.notify(app, 'New version is released. Please download it! Thank you.')
+else:
+    try:
+        threads = []
+        threads.append(threading.Thread(target=ClaimChallenges, args=(faucetcrypto_cookies,)))
+        threads.append(threading.Thread(target=ClaimFaucet, args=(faucetcrypto_cookies,)))
+        threads.append(threading.Thread(target=DoPtcAds, args=(faucetcrypto_cookies,)))
+        threads.append(threading.Thread(target=DoShortlink, args=(faucetcrypto_cookies,)))
+        # threads.append(threading.Thread(target=DoOfferwalls_AsiaMag, args=()))
+        for thread in threads:
+            thread.start()
+        for thread in threads:
+            thread.join()
+    except Exception as ex:
+        print('%s has exception:\n%s!' % (app, ex))
+        notification.notify(app, '%s has exception:\n%s!' % (app, ex))
