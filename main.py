@@ -6,6 +6,8 @@ import threading, requests, time
 import urllib.parse as urlparse
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver import Proxy
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from Modules import update, notification, captcha
 
 app = 'FaucetCrypto'
@@ -19,7 +21,20 @@ opts.binary_location = 'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Applica
 opts.add_experimental_option('excludeSwitches', ['enable-automation'])
 opts.add_experimental_option('useAutomationExtension', False)
 # opts.headless = True  # <-- Comment this line if you want to show browser.
-# opts.add_argument('--proxy-server=%s' % 'YourProxy')  # <-- Remove comment this line then replace 'YourProxy' by proxy string, such as 18.222.190.66:81.
+cap = DesiredCapabilities.CHROME.copy()
+cap['platform'] = 'WINDOWS'
+cap['version'] = '10'
+proxy = 'YourProxy'  # <-- To use proxy, replace 'YourProxy' by proxy string, ex: 18.222.190.66:81
+if proxy != '' and proxy != 'YourProxy':
+    proxies = Proxy({
+        'httpProxy': proxy,
+        'ftpProxy': proxy,
+        'sslProxy': proxy,
+        'proxyType': 'MANUAL',
+    })
+    proxies.add_to_capabilities(cap)
+    opts.add_argument('--ignore-ssl-errors=yes')
+    opts.add_argument('--ignore-certificate-errors')
 
 # Account config
 faucetcrypto_cookies = [
@@ -73,7 +88,7 @@ def ClaimChallenges(faucetcrypto_cookies):
         global sync
         if sync:
             sync = False
-            browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
+            browser = webdriver.Chrome(desired_capabilities=cap, options=opts, executable_path=chromedriver_path)
             browser.set_page_load_timeout(60)
             try:
                 browser.get(app_path)
