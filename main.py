@@ -243,8 +243,10 @@ def DoPtcAds(faucetcrypto_cookies):
                 RemoveFixedElements(browser)
                 havePtcAds = True
                 try:
-                    browser.find_element_by_xpath(
-                        "//a[contains(@href, 'https://faucetcrypto.com/task/ptc-advertisement/')]").click()
+                    a = browser.find_element_by_xpath(
+                        "//a[contains(@href, 'https://faucetcrypto.com/task/ptc-advertisement/')]")
+                    a_href = a.get_attribute('href')
+                    browser.get(a_href)
                     time.sleep(1)
                 except:
                     havePtcAds = False
