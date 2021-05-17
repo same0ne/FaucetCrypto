@@ -6,7 +6,7 @@
 
 import requests
 
-current_version_tag = 'v1.2'
+current_version_tag = 'v1.3'
 
 
 def check():

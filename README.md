@@ -14,9 +14,10 @@
 
    7.1. 2Captcha, [Register here](https://2captcha.com?from=11528745).
 
-   7.2. Will add CapMonster in the next update.
+   7.2. CapMonster, [Register here](https://capmonster.cloud/).
 
 8. Prevent ads redirect or popup by tab controller while auto is running.
+9. Logging.
 
 ###### Tutorial:
 
@@ -34,6 +35,11 @@ v1.2 [View on Youtube](https://www.youtube.com/watch?v=-WruUpRYzEw)
 
 - Claim Challenges.
 - Automatically solve captcha by using 2Captcha.
+
+v1.3 [View on Youtube]()
+
+- Add CapMonster as 2nd anti-captcha services.
+- Add logging function.
 
 ###### Please do step by step to use:
 
@@ -69,9 +75,10 @@ v1.2 [View on Youtube](https://www.youtube.com/watch?v=-WruUpRYzEw)
 
    7.1. 2Captcha, [Đăng ký tại đây](https://2captcha.com?from=11528745).
 
-   7.2. Sẽ thêm CapMonster trong bản cập nhật kế tiếp.
+   7.2. CapMonster, [Đăng ký tại đây](https://capmonster.cloud/).
 
 8. Chặn các quảng cáo chuyển hướng hoặc popup linh tinh trong quá trình chạy auto.
+9. Ghi log.
 
 ###### Hướng dẫn:
 
@@ -89,6 +96,11 @@ v1.2 [Xem trên Youtube](https://www.youtube.com/watch?v=-WruUpRYzEw)
 
 - Nhận thưởng thử thách.
 - Tự động giải captcha bằng 2Captcha.
+
+v1.3 [View on Youtube]()
+
+- Thêm dịch vụ giải captcha thứ hai: CapMonster.
+- Thêm tính năng ghi log.
 
 ###### Vui lòng thực hiện theo các bước sau:
 
