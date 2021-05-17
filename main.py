@@ -74,8 +74,6 @@ if autoCaptcha:
     # <-- Replace by your API Key
     log.file('2Captcha API Key is ' + hc.getAPIKey(), False)
 
-log.screen_n_file('', False)
-
 sync = True
 
 
@@ -107,6 +105,7 @@ def ClaimChallenges(faucetcrypto_cookies):
         global sync
         if sync:
             sync = False
+            log.screen_n_file('', False)
             log.screen_n_file(func.upper())
             browser = webdriver.Chrome(desired_capabilities=cap, options=opts, executable_path=chromedriver_path)
             browser.set_page_load_timeout(60)
@@ -136,8 +135,8 @@ def ClaimChallenges(faucetcrypto_cookies):
                     notification.notify(app, 'No challenge to claim!')
                 time.sleep(1)
             except Exception as ex:
-                log.screen_n_file('  [!] %s has exception:\n%s!' % (app + ' ' + func, ex))
-                notification.notify(app, '%s has exception:\n%s!' % (func, ex))
+                log.screen_n_file('  [!] %s has exception: %s!' % (app + ' ' + func, ex))
+                notification.notify(app, '%s has exception: %s!' % (func, ex))
             finally:
                 browser.quit()
             sync = True
@@ -155,6 +154,7 @@ def ClaimFaucet(faucetcrypto_cookies):
         global sync
         if sync:
             sync = False
+            log.screen_n_file('', False)
             log.screen_n_file(func.upper())
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
             browser.set_page_load_timeout(60)
@@ -240,8 +240,8 @@ def ClaimFaucet(faucetcrypto_cookies):
                     log.screen_n_file('  [-] Not ready to claim!')
                     notification.notify(app, 'Not ready to claim!')
             except Exception as ex:
-                log.screen_n_file('  [!] %s has exception:\n%s!' % (app + ' ' + func, ex))
-                notification.notify(app, '%s has exception:\n%s!' % (func, ex))
+                log.screen_n_file('  [!] %s has exception: %s!' % (app + ' ' + func, ex))
+                notification.notify(app, '%s has exception: %s!' % (func, ex))
             finally:
                 browser.quit()
             sync = True
@@ -259,6 +259,7 @@ def DoPtcAds(faucetcrypto_cookies):
         global sync
         if sync:
             sync = False
+            log.screen_n_file('', False)
             log.screen_n_file(func.upper())
             delay_time = 60
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
@@ -373,8 +374,8 @@ def DoPtcAds(faucetcrypto_cookies):
                             break
                         time.sleep(1)
             except Exception as ex:
-                log.screen_n_file('   [!] %s has exception:\n%s!' % (app + ' ' + func, ex))
-                notification.notify(app, '%s has exception:\n%s!' % (func, ex))
+                log.screen_n_file('   [!] %s has exception: %s!' % (app + ' ' + func, ex))
+                notification.notify(app, '%s has exception: %s!' % (func, ex))
             finally:
                 browser.quit()
             sync = True
@@ -393,6 +394,7 @@ def DoShortlink(faucetcrypto_cookies):
         global sync
         if sync:
             sync = False
+            log.screen_n_file('', False)
             log.screen_n_file(func.upper())
             delay_time = 60
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
@@ -544,8 +546,8 @@ def DoShortlink(faucetcrypto_cookies):
                             break
                         time.sleep(1)
             except Exception as ex:
-                log.screen_n_file('  [!] %s has exception:\n%s!' % (app + ' ' + func, ex))
-                notification.notify(app, '%s has exception:\n%s!' % (func, ex))
+                log.screen_n_file('  [!] %s has exception: %s!' % (app + ' ' + func, ex))
+                notification.notify(app, '%s has exception: %s!' % (func, ex))
             finally:
                 browser.quit()
             sync = True
@@ -569,6 +571,7 @@ def DoOfferwalls_AsiaMag(faucetcrypto_cookies):
         global sync
         if sync:
             sync = False
+            log.screen_n_file('', False)
             log.screen_n_file(func.upper())
             delay_time = 60
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
@@ -664,8 +667,8 @@ def DoOfferwalls_AsiaMag(faucetcrypto_cookies):
                         break
                     time.sleep(1)
             except Exception as ex:
-                log.screen_n_file('  [!] %s has exception:\n%s!' % (app + ' ' + func, ex))
-                notification.notify(app, '%s has exception:\n%s!' % (func, ex))
+                log.screen_n_file('  [!] %s has exception: %s!' % (app + ' ' + func, ex))
+                notification.notify(app, '%s has exception: %s!' % (func, ex))
             finally:
                 browser.quit()
             sync = True
@@ -690,5 +693,5 @@ else:
         for thread in threads:
             thread.join()
     except Exception as ex:
-        log.screen_n_file('[!] %s has exception:\n%s!' % (app, ex))
-        notification.notify(app, '%s has exception:\n%s!' % (app, ex))
+        log.screen_n_file('[!] %s has exception: %s!' % (app, ex))
+        notification.notify(app, '%s has exception: %s!' % (app, ex))
