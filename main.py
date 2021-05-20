@@ -19,13 +19,12 @@ app_domain = 'faucetcrypto.com'
 
 # Browser config
 opts = Options()
-opts.binary_location = 'C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe'  # <-- Change to your Chromium browser path, replace '\' with '\\'.
+opts.binary_location = 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'  # <-- Change to your Chromium browser path, replace '\' with '\\'.
 isNetBox = True
 if opts.binary_location.split('\\')[-1].split('.')[0].lower() != 'netboxbrowser':
-    isBrave = False
+    isNetBox = False
 opts.add_experimental_option('excludeSwitches', ['enable-automation'])
 opts.add_experimental_option('useAutomationExtension', False)
-# opts.headless = True  # <-- Comment this line if you want to show browser.
 cap = DesiredCapabilities.CHROME.copy()
 cap['platform'] = 'WINDOWS'
 cap['version'] = '10'
@@ -66,13 +65,13 @@ log.screen_n_file('\n Script starts at ' + f'{now:%d/%m/%Y %H:%M:%S}', False)
 log.file('FaucetCrypto remember token is ' + faucetcrypto_cookies[0]['value'], False)
 
 # Anti captcha config
-autoCaptcha = False  # <-- Change to True if you want to use 2captcha to solve the captcha.
+autoCaptcha = True  # <-- Change to True if you want to use 2captcha to solve the captcha.
 if autoCaptcha:
+    captchaServiceName = 'CapMonster'  # <--- 2Captcha, CapMonster
     # Replace by your API Key -->
-    hc = captcha.Captcha('2Captcha', 'Your2CaptchaAPIKey')  # <-- 2Captcha or CapMonster
-    # hc = captcha.Captcha('CapMonster', 'YourCapMonsterAPIKey')  # <-- 2Captcha or CapMonster
+    ac = captcha.Captcha(captchaServiceName, 'db18292e0dc0180c14ab7c9ccf6edc1f')
     # <-- Replace by your API Key
-    log.file('2Captcha API Key is ' + hc.getAPIKey(), False)
+    log.file(captchaServiceName + ' API Key is ' + ac.getAPIKey(), False)
 
 sync = True
 
@@ -123,7 +122,7 @@ def ClaimChallenges(faucetcrypto_cookies):
                         if 'cursor-pointer' in button.get_attribute('class'):
                             try:
                                 button.click()
-                                time.sleep(0.5)
+                                time.sleep(1)
                                 claimed += 1
                             except:
                                 pass
@@ -194,7 +193,8 @@ def ClaimFaucet(faucetcrypto_cookies):
                                     if 'sitekey=' in fragment:
                                         sitekey = fragment.split('=')[1]
                                         break
-                                token = hc.HCaptcha(sitekey, browser.current_url)
+                                token = ac.HCaptcha(sitekey, browser.current_url)
+                                log.screen_n_file('    [+] Captcha response is %s.' % (token[:7] + '...' + token[-7:]))
                                 task_id = None
                                 xsrf_token = browser.get_cookie('XSRF-TOKEN')['value']
                                 faucet_crypto_session = browser.get_cookie('faucet_crypto_session')['value']
@@ -261,7 +261,7 @@ def DoPtcAds(faucetcrypto_cookies):
             sync = False
             log.screen_n_file('', False)
             log.screen_n_file(func.upper())
-            delay_time = 60
+            delay_time = 30
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
             browser.set_page_load_timeout(60)
             try:
@@ -292,10 +292,14 @@ def DoPtcAds(faucetcrypto_cookies):
                                 target_tag = None
                                 for handle in browser.window_handles:
                                     browser.switch_to.window(handle)
-                                    if app_domain not in browser.current_url:
-                                        browser.close()
-                                    else:
-                                        target_tag = handle
+                                    try:
+                                        if app_domain not in browser.current_url:
+                                            browser.execute_script("window.alert = function() {};")
+                                            browser.close()
+                                        else:
+                                            target_tag = handle
+                                    except:
+                                        pass
                                 browser.switch_to.window(target_tag)
                             else:
                                 browser.switch_to.window(browser.current_window_handle)
@@ -323,7 +327,8 @@ def DoPtcAds(faucetcrypto_cookies):
                                     if 'sitekey=' in fragment:
                                         sitekey = fragment.split('=')[1]
                                         break
-                                token = hc.HCaptcha(sitekey, browser.current_url)
+                                token = ac.HCaptcha(sitekey, browser.current_url)
+                                log.screen_n_file('    [+] Captcha response is %s.' % (token[:7] + '...' + token[-7:]))
                                 task_id = str(browser.current_url).split('/').pop()
                                 xsrf_token = browser.get_cookie('XSRF-TOKEN')['value']
                                 faucet_crypto_session = browser.get_cookie('faucet_crypto_session')['value']
@@ -388,7 +393,7 @@ def DoPtcAds(faucetcrypto_cookies):
 def DoShortlink(faucetcrypto_cookies):
     func = 'Do Shortlink'
     func_path = '/shortlink/list'
-    func_domain = 'faucetcrypto.com/claim/step/'
+    func_domains = ['exey.io', 'fc.lc', 'fcc.lc', 'faucetcrypto.com/claim/step/', 'faucet.gold']
 
     while True:
         global sync
@@ -396,7 +401,7 @@ def DoShortlink(faucetcrypto_cookies):
             sync = False
             log.screen_n_file('', False)
             log.screen_n_file(func.upper())
-            delay_time = 60
+            delay_time = 30
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
             browser.set_page_load_timeout(60)
             try:
@@ -406,7 +411,7 @@ def DoShortlink(faucetcrypto_cookies):
                 browser.get(app_path + func_path)
                 time.sleep(1)
                 RemoveFixedElements(browser)
-                haveShortlink = True
+                typeShortlink = ''
                 while True:
                     try:
                         windows_count = len(browser.window_handles)
@@ -414,36 +419,47 @@ def DoShortlink(faucetcrypto_cookies):
                             target_tag = None
                             for handle in browser.window_handles:
                                 browser.switch_to.window(handle)
-                                if app_domain not in browser.current_url:
-                                    if windows_count > 1:
-                                        browser.close()
+                                try:
+                                    if app_domain not in browser.current_url:
+                                        if windows_count > 1:
+                                            browser.execute_script("window.alert = function() {};")
+                                            browser.close()
+                                        else:
+                                            browser.get(app_path + func_path)
+                                            target_tag = handle
                                     else:
-                                        browser.get(app_path + func_path)
                                         target_tag = handle
-                                else:
-                                    target_tag = handle
+                                except:
+                                    pass
                             browser.switch_to.window(target_tag)
                         else:
                             browser.switch_to.window(browser.current_window_handle)
                         browser.execute_script('window.scrollTo(0,document.body.scrollHeight);')
-                        if 'https://faucetcrypto.com/task/shortlink/short-fc' in browser.page_source:
+                        if 'https://faucetcrypto.com/task/shortlink/exe-io' in browser.page_source:
+                            typeShortlink = 'Exe.io'
+                            browser.get('https://faucetcrypto.com/task/shortlink/exe-io')
+                        elif 'https://faucetcrypto.com/task/shortlink/fc-lc' in browser.page_source:
+                            typeShortlink = 'Fc.lc'
+                            browser.get('https://faucetcrypto.com/task/shortlink/fc-lc')
+                        elif 'https://faucetcrypto.com/task/shortlink/short-fc' in browser.page_source:
+                            typeShortlink = 'Short.fc'
                             browser.get('https://faucetcrypto.com/task/shortlink/short-fc')
                         elif 'https://faucetcrypto.com/task/shortlink/short-fg' in browser.page_source:
+                            typeShortlink = 'Short.fg'
                             browser.get('https://faucetcrypto.com/task/shortlink/short-fg')
                         else:
-                            haveShortlink = False
                             delay_time = 3600
                             log.screen_n_file('  [-] No Shortlink to click!')
                             notification.notify(app, 'No Shortlink to click!')
                         time.sleep(1)
                     except:
-                        haveShortlink = False
                         delay_time = 3600
                         log.screen_n_file('  [-] No Shortlink to click!')
                         notification.notify(app, 'No Shortlink to click!')
                     finally:
                         break
-                if haveShortlink:
+                if typeShortlink != '':
+                    log.screen_n_file('  [+] Choose %s type to do.' % typeShortlink)
                     time_start = time.time()
                     is_shortlink_page = False
                     step_count = 0
@@ -453,11 +469,20 @@ def DoShortlink(faucetcrypto_cookies):
                                 target_tag = None
                                 for handle in browser.window_handles:
                                     browser.switch_to.window(handle)
-                                    if (app_domain not in browser.current_url and not is_shortlink_page) or (
-                                            func_domain not in browser.current_url and is_shortlink_page):
-                                        browser.close()
-                                    else:
-                                        target_tag = handle
+                                    try:
+                                        if (app_domain not in browser.current_url and not is_shortlink_page) \
+                                                or ((func_domains[0] not in browser.current_url
+                                                     and func_domains[1] not in browser.current_url
+                                                     and func_domains[2] not in browser.current_url
+                                                     and func_domains[3] not in browser.current_url
+                                                     and func_domains[4] not in browser.current_url)
+                                                    and is_shortlink_page):
+                                            browser.execute_script("window.alert = function() {};")
+                                            browser.close()
+                                        else:
+                                            target_tag = handle
+                                    except:
+                                        pass
                                 browser.switch_to.window(target_tag)
                             else:
                                 browser.switch_to.window(browser.current_window_handle)
@@ -485,7 +510,7 @@ def DoShortlink(faucetcrypto_cookies):
                                     if 'sitekey=' in fragment:
                                         sitekey = fragment.split('=')[1]
                                         break
-                                token = hc.HCaptcha(sitekey, browser.current_url)
+                                token = ac.HCaptcha(sitekey, browser.current_url)
                                 task_id = str(browser.current_url).split('/').pop()
                                 xsrf_token = browser.get_cookie('XSRF-TOKEN')['value']
                                 faucet_crypto_session = browser.get_cookie('faucet_crypto_session')['value']
@@ -523,23 +548,202 @@ def DoShortlink(faucetcrypto_cookies):
                                         button.click()
                                     except:
                                         pass
-                        elif '<span class="text-primary" id="timer">?</span>' in browser.page_source:
-                            try:
-                                browser.find_element_by_xpath(
-                                    "//button[contains(text(), 'Show Timer / Click Here')]").click()
+                        elif typeShortlink == 'Exe.io':
+                            if 'Click here to continue' in browser.page_source:
                                 is_shortlink_page = True
-                            except:
-                                pass
-                        elif '<span class="text-primary" id="timer">0</span>' in browser.page_source:
-                            try:
-                                browser.find_element_by_xpath("//button[contains(text(), 'Continue')]").click()
-                                step_count += 1
-                                if step_count == 3:
+                                while True:
+                                    try:
+                                        browser.find_element_by_xpath(
+                                            "//button[contains(text(), 'Click here to continue')]").click()
+                                    except:
+                                        elements = browser.find_elements_by_xpath(
+                                            "//div[contains(@style, 'height: 34px; width: 167.5px; z-index: 2147483647;')]")
+                                        for element in elements:
+                                            try:
+                                                element.click()
+                                            except:
+                                                pass
+                                    time.sleep(1)
+                                    if 'Click here to continue' not in browser.page_source:
+                                        break
+                            elif 'Continue' in browser.page_source:
+                                is_shortlink_page = True
+                                if autoCaptcha:
+                                    log.screen_n_file('    [+] Automatically solve captcha.')
+                                    try:
+                                        recaptcha = browser.find_element_by_xpath(
+                                            "//iframe[contains(@title, 'recaptcha challenge')]")
+                                        sitekey = ''
+                                        for query in urlparse.urlparse(recaptcha.get_attribute('src')).query.split('&'):
+                                            if 'k=' in query:
+                                                sitekey = query.split('=')[1]
+                                        token = ac.reCaptcha(sitekey, browser.current_url)
+                                        log.screen_n_file(
+                                            '      [+] Captcha response is %s.' % (token[:7] + '...' + token[-7:]))
+                                        browser.execute_script('''
+                                            document.getElementById("g-recaptcha-response").innerHTML = arguments[0];
+                                            function call_cbf() {
+                                                let widgetId = 0;
+                                                let widget = ___grecaptcha_cfg.clients[widgetId];
+                                                let callback = undefined;
+                                                for (let k1 in widget) {
+                                                    let obj = widget[k1];
+                                                    if (typeof obj !== "object") continue;
+                                                    for (let k2 in obj) {
+                                                        if (obj[k2] === null) continue;
+                                                        if (typeof obj[k2] !== "object") continue;
+                                                        if (obj[k2].callback === undefined) continue;
+                                                        callback = obj[k2].callback;
+                                                        break
+                                                    }
+                                                    if (callback === undefined) break;
+                                                }
+                                                callback.bind(this);
+                                                callback();
+                                            }
+                                            call_cbf();
+                                        ''', token)
+                                        time.sleep(1)
+                                        while True:
+                                            try:
+                                                browser.switch_to.window(browser.current_window_handle)
+                                                if 'faucetcrypto.com' in browser.page_source:
+                                                    returnLink = browser.find_element_by_xpath(
+                                                        "//a[contains(@class, 'get-link')]").get_attribute('href')
+                                                    browser.get(returnLink)
+                                                    time.sleep(1)
+                                                    break
+                                            except:
+                                                pass
+                                            time.sleep(1)
+                                        log.screen_n_file('  [+] Complete Shortlink task!')
+                                        notification.notify(app, 'Complete Shortlink task!')
+                                        break
+                                    except:
+                                        pass
+                                else:
+                                    log.screen_n_file('    [+] Manually solve captcha.')
+                                    notification.sound()
+                                    notification.notify(app, 'Please solve captcha!')
+                                    time.sleep(60)
+                                    while True:
+                                        try:
+                                            browser.switch_to.window(browser.current_window_handle)
+                                            if 'faucetcrypto.com' in browser.page_source:
+                                                returnLink = browser.find_element_by_xpath(
+                                                    "//a[contains(@class, 'get-link')]").get_attribute('href')
+                                                browser.get(returnLink)
+                                                time.sleep(1)
+                                                break
+                                        except:
+                                            pass
+                                        time.sleep(1)
                                     log.screen_n_file('  [+] Complete Shortlink task!')
                                     notification.notify(app, 'Complete Shortlink task!')
                                     break
-                            except:
-                                pass
+                        elif typeShortlink == 'Fc.lc':
+                            if 'Click here to continue' in browser.page_source:
+                                if 'title="reCAPTCHA"' not in browser.page_source:
+                                    is_shortlink_page = True
+                                    while True:
+                                        try:
+                                            browser.find_element_by_xpath(
+                                                "//button[contains(text(), 'Click here to continue')]").click()
+                                        except:
+                                            pass
+                                        time.sleep(1)
+                                        if 'title="reCAPTCHA"' in browser.page_source:
+                                            break
+                                else:
+                                    is_shortlink_page = True
+                                    if autoCaptcha:
+                                        log.screen_n_file('    [+] Automatically solve captcha.')
+                                        try:
+                                            recaptcha = browser.find_element_by_xpath(
+                                                "//iframe[contains(@title, 'reCAPTCHA')]")
+                                            sitekey = ''
+                                            for query in urlparse.urlparse(recaptcha.get_attribute('src')).query.split(
+                                                    '&'):
+                                                if 'k=' in query:
+                                                    sitekey = query.split('=')[1]
+                                            token = ac.reCaptcha(sitekey, browser.current_url)
+                                            log.screen_n_file(
+                                                '      [+] Captcha response is %s.' % (token[:7] + '...' + token[-7:]))
+                                            browser.execute_script('''
+                                                document.getElementById("g-recaptcha-response").innerHTML = arguments[0];
+                                                whenCaptchaChecked();
+                                            ''', token)
+                                            time.sleep(1)
+                                            while True:
+                                                try:
+                                                    browser.find_element_by_xpath(
+                                                        "//button[contains(text(), 'Click here to continue')]").click()
+                                                except:
+                                                    pass
+                                                time.sleep(1)
+                                                if 'title="reCAPTCHA"' not in browser.page_source:
+                                                    break
+                                            while True:
+                                                try:
+                                                    browser.switch_to.window(browser.current_window_handle)
+                                                    if 'faucetcrypto.com' in browser.page_source:
+                                                        returnLink = browser.find_element_by_xpath(
+                                                            "//a[contains(@id, 'surl')]").get_attribute('href')
+                                                        browser.get(returnLink)
+                                                        time.sleep(1)
+                                                        break
+                                                except:
+                                                    pass
+                                                time.sleep(1)
+                                            log.screen_n_file('  [+] Complete Shortlink task!')
+                                            notification.notify(app, 'Complete Shortlink task!')
+                                            break
+                                        except:
+                                            pass
+                                    else:
+                                        log.screen_n_file('    [+] Manually solve captcha.')
+                                        notification.sound()
+                                        notification.notify(app, 'Please solve captcha!')
+                                        time.sleep(60)
+                                        while True:
+                                            try:
+                                                browser.switch_to.window(browser.current_window_handle)
+                                                if 'faucetcrypto.com' in browser.page_source:
+                                                    returnLink = browser.find_element_by_xpath(
+                                                        "//a[contains(@id, 'surl')]").get_attribute('href')
+                                                    browser.get(returnLink)
+                                                    time.sleep(1)
+                                                    break
+                                            except:
+                                                pass
+                                            time.sleep(1)
+                                        log.screen_n_file('  [+] Complete Shortlink task!')
+                                        notification.notify(app, 'Complete Shortlink task!')
+                                        break
+                        elif typeShortlink == 'Short.fc' or typeShortlink == 'Short.fg':
+                            if '<span class="text-primary" id="timer">?</span>' in browser.page_source:
+                                is_shortlink_page = True
+                                try:
+                                    browser.find_element_by_xpath(
+                                        "//button[contains(text(), 'Show Timer / Click Here')]").click()
+                                except:
+                                    browser.execute_script('''
+                                         document.getElementById("showTimerText").click()
+                                    ''')
+                            elif '<span class="text-primary" id="timer">0</span>' in browser.page_source:
+                                is_shortlink_page = True
+                                try:
+                                    browser.find_element_by_xpath("//button[contains(text(), 'Continue')]").click()
+                                    step_count += 1
+                                except:
+                                    browser.execute_script('''
+                                         document.getElementById("main-button").click()
+                                    ''')
+                                finally:
+                                    if step_count == 3:
+                                        log.screen_n_file('  [+] Complete Shortlink task!')
+                                        notification.notify(app, 'Complete Shortlink task!')
+                                        break
                         if time.time() - time_start > 360:
                             log.screen_n_file('  [-] Timeout.')
                             notification.notify(app, 'Timeout.')
@@ -573,7 +777,7 @@ def DoOfferwalls_AsiaMag(faucetcrypto_cookies):
             sync = False
             log.screen_n_file('', False)
             log.screen_n_file(func.upper())
-            delay_time = 60
+            delay_time = 30
             browser = webdriver.Chrome(options=opts, executable_path=chromedriver_path)
             browser.set_page_load_timeout(60)
             try:
@@ -591,10 +795,14 @@ def DoOfferwalls_AsiaMag(faucetcrypto_cookies):
                             target_tag = None
                             for handle in browser.window_handles:
                                 browser.switch_to.window(handle)
-                                if func_domain not in browser.current_url:
-                                    browser.close()
-                                else:
-                                    target_tag = handle
+                                try:
+                                    if func_domain not in browser.current_url:
+                                        browser.execute_script("window.alert = function() {};")
+                                        browser.close()
+                                    else:
+                                        target_tag = handle
+                                except:
+                                    pass
                             browser.switch_to.window(target_tag)
                         else:
                             browser.switch_to.window(browser.current_window_handle)
@@ -683,9 +891,9 @@ if update.check():
 else:
     try:
         threads = []
-        threads.append(threading.Thread(target=ClaimChallenges, args=(faucetcrypto_cookies,)))
-        threads.append(threading.Thread(target=ClaimFaucet, args=(faucetcrypto_cookies,)))
-        threads.append(threading.Thread(target=DoPtcAds, args=(faucetcrypto_cookies,)))
+        # threads.append(threading.Thread(target=ClaimChallenges, args=(faucetcrypto_cookies,)))
+        # threads.append(threading.Thread(target=ClaimFaucet, args=(faucetcrypto_cookies,)))
+        # threads.append(threading.Thread(target=DoPtcAds, args=(faucetcrypto_cookies,)))
         threads.append(threading.Thread(target=DoShortlink, args=(faucetcrypto_cookies,)))
         # threads.append(threading.Thread(target=DoOfferwalls_AsiaMag, args=()))
         for thread in threads:
