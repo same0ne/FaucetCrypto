@@ -39,7 +39,7 @@ v1.2 [View on Youtube](https://www.youtube.com/watch?v=-WruUpRYzEw)
 - Claim Challenges.
 - Automatically solve captcha by using 2Captcha.
 
-v1.3 [View on Youtube]()
+v1.3 [View on Youtube](https://youtu.be/z8gLb1hVvow)
 
 - Fix bugs in do Shortlink tasks function, **Short.fg** type.
 - Add do Shorlink for **Exe.io** and **Fc.lc** types.
@@ -106,7 +106,7 @@ v1.2 [Xem trên Youtube](https://www.youtube.com/watch?v=-WruUpRYzEw)
 - Nhận thưởng thử thách.
 - Tự động giải captcha bằng 2Captcha.
 
-v1.3 [View on Youtube]()
+v1.3 [View on Youtube](https://youtu.be/z8gLb1hVvow)
 
 - Sửa lỗi trong tính năng làm nhiệm vụ Shortlink, đối với loại **Short.fg**.
 - Thêm làm nhiệm vụ Shortlink cho dạng **Exe.io** và **Fc.lc**.

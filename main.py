@@ -4,7 +4,7 @@
 
 # Solve captcha by using https://2captcha.com?from=11528745.
 
-import threading, requests, time
+import os, threading, requests, time
 from datetime import datetime
 import urllib.parse as urlparse
 from selenium import webdriver
@@ -69,7 +69,7 @@ autoCaptcha = True  # <-- Change to True if you want to use 2captcha to solve th
 if autoCaptcha:
     captchaServiceName = 'CapMonster'  # <--- 2Captcha, CapMonster
     # Replace by your API Key -->
-    ac = captcha.Captcha(captchaServiceName, 'db18292e0dc0180c14ab7c9ccf6edc1f')
+    ac = captcha.Captcha(captchaServiceName, 'YourSolvingCaptchaServiceAPIKey')
     # <-- Replace by your API Key
     log.file(captchaServiceName + ' API Key is ' + ac.getAPIKey(), False)
 
@@ -888,12 +888,13 @@ def DoOfferwalls_AsiaMag(faucetcrypto_cookies):
 if update.check():
     log.screen_n_file('[*] New version is released. Please download it! Thank you.')
     notification.notify(app, 'New version is released. Please download it! Thank you.')
+    os.system('start https://www.youtube.com/c/AutoAlmostEverything')
 else:
     try:
         threads = []
-        # threads.append(threading.Thread(target=ClaimChallenges, args=(faucetcrypto_cookies,)))
-        # threads.append(threading.Thread(target=ClaimFaucet, args=(faucetcrypto_cookies,)))
-        # threads.append(threading.Thread(target=DoPtcAds, args=(faucetcrypto_cookies,)))
+        threads.append(threading.Thread(target=ClaimChallenges, args=(faucetcrypto_cookies,)))
+        threads.append(threading.Thread(target=ClaimFaucet, args=(faucetcrypto_cookies,)))
+        threads.append(threading.Thread(target=DoPtcAds, args=(faucetcrypto_cookies,)))
         threads.append(threading.Thread(target=DoShortlink, args=(faucetcrypto_cookies,)))
         # threads.append(threading.Thread(target=DoOfferwalls_AsiaMag, args=()))
         for thread in threads:
